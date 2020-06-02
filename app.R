@@ -27,7 +27,7 @@ ui <- fluidPage(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
   
-  titlePanel("Covid19 QALY Calculator"),
+  titlePanel("CHiL Covid19 QALY Calculator"),
   
   sidebarPanel(h3("Key Analytical Inputs"),
               
@@ -53,12 +53,13 @@ ui <- fluidPage(
   mainPanel(
     
     h3("Results"),
-    h5("For description of use and resources see: https://github.com/NikkiR08/covid19_QALY_calculator"),
-    
-    h6("Please note it takes a few moments (up to 30 seconds) to load and/or update"),
-    br(),
+      br(),
     
     tableOutput("resultstab"),
+     br(),
+    h5("App by N.R Naylor. Description of use and resources see: https://github.com/NikkiR08/covid19_QALY_calculator"),
+    
+    h5("Based on A. Briggs 2020 Covid19 QALY Excel Tool: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
     
                
     )
@@ -145,20 +146,18 @@ server <- function(input,output){
     
     qaly.calc <- qale[ , c("x.x","z_x")]
     
-    l.qalyc <- list()
-    
+    temp.q <- list()
     for (i in 1:nrow(qaly.calc)){
-      temp <- qaly.calc[i:nrow(qaly.calc),]
-      
-      for (j in 1:nrow(temp)){
-        temp[j, b_x := z_x/((1+r))^(x.x-(i-1))]
-      }
-      l.qalyc[[i]] <- temp
+      temp.q[[i]] <- qaly.calc[i:nrow(qaly.calc),]
     }
     
-    for (i in 1:nrow(qaly.calc)){
-      qale[i, bigb_x := colSums(l.qalyc[[i]])[3]]
-    }
+    temp.q <- bind_rows(temp.q, .id = "column_label")
+    temp.q[ , column_label := as.numeric(column_label)-1]
+    temp.q[ , b_x := z_x/((1+r))^(x.x-(column_label))]
+    
+    total.b <- temp.q[,.(bigb_x=sum(b_x)), by=column_label]
+    colnames(total.b) <- c("x.x","bigb_x")
+    qale <- merge(qale, total.b, by="x.x")
     
     qale[ , dQALY := bigb_x/l_person]
     
