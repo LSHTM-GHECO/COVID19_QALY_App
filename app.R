@@ -53,13 +53,14 @@ ui <- fluidPage(
   mainPanel(
     
     h3("Results"),
+    h5("For description of use and resources see: https://github.com/NikkiR08/covid19_QALY_calculator"),
     
-    h6("Please note it takes a few moments (up to 15 seconds) to load and/or update"),
+    h6("Please note it takes a few moments (up to 30 seconds) to load and/or update"),
     br(),
     
-    tableOutput("resultstab")
-
-                
+    tableOutput("resultstab"),
+    
+               
     )
   )
 
