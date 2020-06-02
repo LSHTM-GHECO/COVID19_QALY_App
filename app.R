@@ -1,16 +1,16 @@
 
 ################## requried libraries
-library(shiny)
-library(xlsx)
-library(rsconnect)
-library(tidyr)
-library(data.table)
+require(shiny)
+require(xlsx)
+require(rsconnect)
+require(tidyr)
+require(data.table)
 
 ################# required data
-q.male <- as.data.table(read.xlsx("Inputs/inputs_xcl.xlsx", 1))
-q.female <- as.data.table(read.xlsx("Inputs/inputs_xcl.xlsx", 2)) 
-qol <- as.data.table(read.xlsx("Inputs/inputs_xcl.xlsx", 3))
-covid.age <- as.data.table(read.xlsx("Inputs/inputs_xcl.xlsx", 4))
+q.male <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 1))
+q.female <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 2)) 
+qol <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 3))
+covid.age <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 4))
 
 
 # The user interface (ui) object controls the layout and appearance of your app. 
@@ -54,7 +54,7 @@ ui <- fluidPage(
     
     h3("Results"),
     
-    h6("Please note it takes a few moments to load and/or update"),
+    h6("Please note it takes a few moments (up to 15 seconds) to load and/or update"),
     br(),
     
     tableOutput("resultstab")
