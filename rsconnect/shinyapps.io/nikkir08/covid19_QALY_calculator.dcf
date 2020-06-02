@@ -5,8 +5,8 @@ account: nikkir08
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2393977
-bundleId: 3218285
+bundleId: 3218349
 url: https://nikkir08.shinyapps.io/covid19_QALY_calculator/
-when: 1591102581.70108
+when: 1591103392.22852
 asMultiple: FALSE
 asStatic: FALSE

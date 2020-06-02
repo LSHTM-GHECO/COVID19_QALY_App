@@ -3,6 +3,7 @@
 require(shiny)
 require(xlsx)
 require(rsconnect)
+require(dplyr)
 require(tidyr)
 require(data.table)
 
