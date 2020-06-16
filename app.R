@@ -62,7 +62,7 @@ ui <- fluidPage(
     h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years"),
     br(),
     
-    h6("App by N.R Naylor. Description of use and resources see: https://github.com/NikkiR08/covid19_QALY_calculator"),
+    h6("App by N.R Naylor. Description of use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
     
     h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
     
