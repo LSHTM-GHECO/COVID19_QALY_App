@@ -28,7 +28,7 @@ ui <- fluidPage(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
   
-  titlePanel("CHiL Covid19 QALY Calculator"),
+  titlePanel("CHiL COVID-19 QALY Calculator"),
   
   sidebarPanel(h3("Key Analytical Inputs"),
               
@@ -182,7 +182,7 @@ server <- function(input,output){
     estimates <- colSums(cov)
     resultstab <- data.table("Weighted LE Loss"=estimates["weight.LE"],
                           "Weighted QALE Loss"=estimates["weight.qale"],
-                          "Weighted QALY loss"=estimates["weight.qaly"])
+                          "Weighted dQALY loss"=estimates["weight.qaly"])
     
    
   })
