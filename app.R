@@ -42,7 +42,7 @@ ui <- fluidPage(
                             max = 100),
               
                ##assumed reduction in QoL due to comorbidities
-               numericInput("qcm", em("qCM"), 1, min = 0, 
+               numericInput("qcm", em("qCM for comorbidities"), 1, min = 0, 
                             max = 1),
                
                ## discount rate
@@ -59,7 +59,8 @@ ui <- fluidPage(
     tableOutput("resultstab"),
      br(),
     
-    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years"),
+    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years,
+    SMR - standardized mortality ratio, qCM - cormobidity impacts on quality of life"),
     br(),
     
     h6("App by N.R Naylor. Description of use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),

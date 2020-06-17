@@ -1,0 +1,12 @@
+name: COVID19_QALY_App
+title: COVID19_QALY_App
+username:
+account: lshtm-chil
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2461377
+bundleId: 3281713
+url: https://lshtm-chil.shinyapps.io/COVID19_QALY_App/
+when: 1592391716.71667
+asMultiple: FALSE
+asStatic: FALSE
