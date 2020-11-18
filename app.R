@@ -38,15 +38,15 @@ ui <- fluidPage(
                
                 
                ## SMR
-               numericInput("smr", em("SMR for comorbidities"), 1, min = 0, 
+               numericInput("smr", em("SMR for comorbidities [number between 1-5]"), 1, min = 0, 
                             max = 100),
               
                ##assumed reduction in QoL due to comorbidities
-               numericInput("qcm", em("qCM for comorbidities"), 1, min = 0, 
+               numericInput("qcm", em("qCM for comorbidities [number between 0-1]"), 1, min = 0, 
                             max = 1),
                
                ## discount rate
-               numericInput("r", em("discount rate"), 0.035, min = 0, 
+               numericInput("r", em("discount rate [number between 0-1]"), 0.035, min = 0, 
                             max = 1)
                
   ),
@@ -63,9 +63,10 @@ ui <- fluidPage(
     SMR - standardized mortality ratio, qCM - cormobidity impacts on quality of life"),
     br(),
     
-    h6("App by N.R Naylor. Description of use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
+    h6("App by N.R Naylor. For description of how to use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
     
-    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 4.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
+    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 5.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
+    h6("Last updated November 2020"),
     h6("This code may take a few seconds to run so please be patient"),
                
     )

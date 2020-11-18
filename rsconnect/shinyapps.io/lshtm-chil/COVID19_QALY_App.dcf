@@ -5,8 +5,8 @@ account: lshtm-chil
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2461377
-bundleId: 3876434
+bundleId: 3876970
 url: https://lshtm-chil.shinyapps.io/COVID19_QALY_App/
-when: 1605713001.69244
+when: 1605722722.14105
 asMultiple: FALSE
 asStatic: FALSE
