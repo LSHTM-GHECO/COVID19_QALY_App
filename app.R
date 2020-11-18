@@ -28,7 +28,7 @@ ui <- fluidPage(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
   
-  titlePanel("CHiL COVID-19 QALY Calculator"),
+  titlePanel("CHIL COVID-19 QALY Calculator"),
   
   sidebarPanel(h3("Key Analytical Inputs"),
               
@@ -65,8 +65,8 @@ ui <- fluidPage(
     
     h6("App by N.R Naylor. Description of use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
     
-    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
-    
+    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 4.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
+    h6("This code may take a few seconds to run so please be patient"),
                
     )
   )
