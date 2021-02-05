@@ -14,81 +14,10 @@ qol <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 3))
 covid.age <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 4))
 
 
-# The user interface (ui) object controls the layout and appearance of your app. 
-# The server function contains the instructions that your computer needs to build your app. 
-# Finally the shinyApp function creates Shiny app objects from an explicit UI/server pair.
-
-###################### BACKGROUND CODE ##############################
-
-#######################################################################
-############## USER INTERFACE ########################################
-ui <- fluidPage(  
-  
-  tags$head(
-    tags$style(HTML("hr {border-top: 1px solid #000000;}"))
-  ),
-  
-  titlePanel("CHIL COVID-19 QALY Calculator"),
-  
-  sidebarPanel(h3("Key Analytical Inputs"),
-              
-               ## nationality
-               radioButtons(inputId="country", label="Country", 
-                            choices=c("UK", "US","Canada","Norway","Israel"), selected = "UK"),
-               
-                
-               ## SMR
-               numericInput("smr", em("SMR for comorbidities [number between 1-5]"), 1, min = 0, 
-                            max = 100),
-              
-               ##assumed reduction in QoL due to comorbidities
-               numericInput("qcm", em("qCM for comorbidities [number between 0-1]"), 1, min = 0, 
-                            max = 1),
-               
-               ## discount rate
-               numericInput("r", em("discount rate [number between 0-1]"), 0.035, min = 0, 
-                            max = 1)
-               
-  ),
-  
-  mainPanel(
-    
-    h3("Results"),
-      br(),
-    
-    tableOutput("resultstab"),
-     br(),
-    
-    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years,
-    SMR - standardized mortality ratio, qCM - cormobidity impacts on quality of life"),
-    br(),
-    
-    h6("App by N.R Naylor. For description of how to use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
-    
-    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 5.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
-    h6("Last updated November 2020"),
-    h6("This code may take a few seconds to run so please be patient"),
-               
-    )
-  )
-
-
-######################################################
-############# SERVER ###############################################
-server <- function(input,output){
-  
-  
-  # Reactive dependencies - if these change then MODEL will run again and update values
-  xxchange <- reactive({
-    paste(input$smr, input$country, input$qcm, input$r)
-    }) 
-  
-  
-  model <- eventReactive(xxchange(), {
-   country <- input$country
-   smr <- input$smr
-   qcm <- input$qcm
-   r <- input$r
+    country <- "UK"
+    smr <- 2
+    qcm <- 0.4
+    r <- 0.03
     
     myvector <- c("Age",country)
     
@@ -165,7 +94,6 @@ server <- function(input,output){
     temp.q_copy[ , column_label := as.numeric(column_label)-1]
     temp.q_copy[ , b_x := z_x/((1+r))^(x.x-(column_label))] ## n.b x.x = u and column_label = x in the corresponding formulae in the CodeBook
     
-    
     total.b <- temp.q_copy[,.(bigb_x=sum(b_x)), by=column_label]
     colnames(total.b) <- c("x.x","bigb_x")
     qale <- merge(qale, total.b, by="x.x")
@@ -187,18 +115,11 @@ server <- function(input,output){
     
     estimates <- colSums(cov)
     resultstab <- data.table("Weighted LE Loss"=estimates["weight.LE"],
-                          "Weighted QALE Loss"=estimates["weight.qale"],
-                          "Weighted dQALY loss"=estimates["weight.qaly"])
+                             "Weighted QALE Loss"=estimates["weight.qale"],
+                             "Weighted dQALY loss"=estimates["weight.qaly"])
     
-   
-  })
-
+    
 
   
-  output$resultstab <- renderTable(model())
-
-}
-
-##################################################################
-############ SHINYAPP ###########################################
-shinyApp(ui = ui, server = server)
+  
+  
