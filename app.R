@@ -28,9 +28,9 @@ ui <- fluidPage(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
   
-  titlePanel("CHIL COVID-19 QALY Calculator"),
+  titlePanel("The COVID-19 Excess-Death QALY Loss Calculator"),
   
-  sidebarPanel(h3("Key Analytical Inputs"),
+  sidebarPanel(h3("Key Inputs"),
               
                ## nationality
                radioButtons(inputId="country", label="Country", 
@@ -38,16 +38,16 @@ ui <- fluidPage(
                
                 
                ## SMR
-               numericInput("smr", em("SMR for comorbidities [number between 1-5]"), 1, min = 0, 
-                            max = 100),
+               numericInput("smr", em("Standardized Mortality Ratios for comorbidities (number between 1-5)"), 1, min = 1, 
+                            max = 5),
               
                ##assumed reduction in QoL due to comorbidities
-               numericInput("qcm", em("qCM for comorbidities [number between 0-1]"), 1, min = 0, 
-                            max = 1),
+               numericInput("qcm", em("Comorbidity Quality of Life Adjustment Factor (%)"), 100, min = 0, 
+                            max = 100),
                
                ## discount rate
-               numericInput("r", em("discount rate [number between 0-1]"), 0.035, min = 0, 
-                            max = 1)
+               numericInput("r", em("Discount rate (%)"), 3.5, min = 0, 
+                            max = 100)
                
   ),
   
@@ -59,16 +59,17 @@ ui <- fluidPage(
     tableOutput("resultstab"),
      br(),
     
-    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years,
-    SMR - standardized mortality ratio, qCM - cormobidity impacts on quality of life"),
+    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years"),
     br(),
-    
-    h6("App by N.R Naylor. For description of how to use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
-    
+    h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM): Percentage of population quality of life norms associated with the comorbidity group"), 
+    h5("Note that this calculator calculates QALY losses only from excess deaths"),
+    br(),
+    h6("App & R code by N.R Naylor. For description of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
     h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 5.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
-    h6("Last updated November 2020"),
-    h6("This code may take a few seconds to run so please be patient"),
-               
+    h6("& Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020)"),
+    h6("Last updated Febuary 2020"),
+    h6("This code may take a few seconds to run on first loading so please be patient"),
+    h6("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")           
     )
   )
 
@@ -87,9 +88,17 @@ server <- function(input,output){
   model <- eventReactive(xxchange(), {
    country <- input$country
    smr <- input$smr
-   qcm <- input$qcm
-   r <- input$r
-    
+   qcm <- input$qcm/100
+   r <- input$r/100
+  
+   validate(
+     need(input$smr <=5, "SMR input is invalid, please try another value"),
+     need(input$smr >=1, "SMR input is invalid, please try another value"),
+     need(input$r <=100, "Please choose a valid discount rate between 0% and 100%"),
+     need(input$r >=0, "Please choose a valid discount rate between 0% and 100%"),
+     need(input$qcm <=100, "Please choose a valid qCM between 0% and 100%"),
+     need(input$qcm >=0, "Please choose a valid qCM between 0% and 100%")
+   )
     myvector <- c("Age",country)
     
     l_x_est <- function(dt, countr, smr){
