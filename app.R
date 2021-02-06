@@ -64,10 +64,10 @@ ui <- fluidPage(
     h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years"),
     h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM)- Percentage of population quality of life norms in the comorbidity group"), 
     h5("Note that this calculator calculates QALY losses from excess deaths only, weighted across the frequency distribution of age at death for COVID‐19"),
-    code("App & R code by N.R Naylor. For description of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
+    code("App & R code by N.R Naylor. For descriptions of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
     code("Last updated Febuary 2020, This code may take a few seconds to run on first loading so please be patient"),
     br(),
-    strong("Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020), Excel Model Version 5.0."),
+    strong("Based on Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020), Excel Model Version 5.0."),
     strong("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")           
     )
   )
