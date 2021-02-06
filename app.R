@@ -1,6 +1,7 @@
 
 ################## requried libraries
 require(shiny)
+require(shinythemes)
 require(xlsx)
 require(rsconnect)
 require(dplyr)
@@ -23,7 +24,7 @@ covid.age <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 4))
 #######################################################################
 ############## USER INTERFACE ########################################
 ui <- fluidPage(  
-  
+  theme = shinythemes::shinytheme("flatly"),
   tags$head(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
@@ -57,19 +58,17 @@ ui <- fluidPage(
       br(),
     
     tableOutput("resultstab"),
-     br(),
-    
+    tags$head(tags$style("#resultstab table {background-color: lightblue; }", media="screen", type="text/css")),
+
+    br(),
     h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years"),
+    h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM)- Percentage of population quality of life norms in the comorbidity group"), 
+    h5("Note that this calculator calculates QALY losses from excess deaths only, weighted across the frequency distribution of age at death for COVID‐19"),
+    code("App & R code by N.R Naylor. For description of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
+    code("Last updated Febuary 2020, This code may take a few seconds to run on first loading so please be patient"),
     br(),
-    h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM): Percentage of population quality of life norms associated with the comorbidity group"), 
-    h5("Note that this calculator calculates QALY losses only from excess deaths"),
-    br(),
-    h6("App & R code by N.R Naylor. For description of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
-    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 5.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
-    h6("& Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020)"),
-    h6("Last updated Febuary 2020"),
-    h6("This code may take a few seconds to run on first loading so please be patient"),
-    h6("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")           
+    strong("Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020), Excel Model Version 5.0."),
+    strong("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")           
     )
   )
 
@@ -198,13 +197,12 @@ server <- function(input,output){
     resultstab <- data.table("Weighted LE Loss"=estimates["weight.LE"],
                           "Weighted QALE Loss"=estimates["weight.qale"],
                           "Weighted dQALY loss"=estimates["weight.qaly"])
-    
    
   })
 
 
   
-  output$resultstab <- renderTable(model())
+  output$resultstab <- renderTable(model(), bordered = TRUE)
 
 }
 
