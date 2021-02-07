@@ -1,6 +1,7 @@
 
 ################## requried libraries
 require(shiny)
+require(shinythemes)
 require(xlsx)
 require(rsconnect)
 require(dplyr)
@@ -23,14 +24,14 @@ covid.age <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 4))
 #######################################################################
 ############## USER INTERFACE ########################################
 ui <- fluidPage(  
-  
+  theme = shinythemes::shinytheme("flatly"),
   tags$head(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
   
-  titlePanel("CHIL COVID-19 QALY Calculator"),
+  titlePanel("The COVID-19 QALY Loss Calculator for Associated Deaths"),
   
-  sidebarPanel(h3("Key Analytical Inputs"),
+  sidebarPanel(h3("Key Inputs"),
               
                ## nationality
                radioButtons(inputId="country", label="Country", 
@@ -38,39 +39,47 @@ ui <- fluidPage(
                
                 
                ## SMR
-               numericInput("smr", em("SMR for comorbidities [number between 1-5]"), 1, min = 0, 
-                            max = 100),
+               numericInput("smr", em("Standardized Mortality Ratios for comorbidities (number between 1-5)"), 1, min = 1, 
+                            max = 5),
               
                ##assumed reduction in QoL due to comorbidities
-               numericInput("qcm", em("qCM for comorbidities [number between 0-1]"), 1, min = 0, 
-                            max = 1),
+               numericInput("qcm", em("Comorbidity Quality of Life Adjustment Factor (0%-100%)"), 100, min = 0, 
+                            max = 100),
                
                ## discount rate
-               numericInput("r", em("discount rate [number between 0-1]"), 0.035, min = 0, 
-                            max = 1)
+               numericInput("r", em("Discount rate (0%-10%)"), 3.5, min = 0, 
+                            max = 100)
                
   ),
   
   mainPanel(
-    
-    h3("Results"),
+    tabsetPanel(type = "tabs", 
+                tabPanel("Main Results",
+    h3("Weighted Mean Loss per Death"),
       br(),
     
     tableOutput("resultstab"),
-     br(),
-    
-    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years,
-    SMR - standardized mortality ratio, qCM - cormobidity impacts on quality of life"),
+    tags$head(tags$style("#resultstab table {background-color: lightblue; }", media="screen", type="text/css")),
+
     br(),
+    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years"),
+    h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM)- Percentage of population quality of life norms in the comorbidity group"), 
+    h5("Note that this calculator calculates QALY losses from excess deaths only, weighted across the frequency distribution of age at death for COVID‐19"),
+    code("App & R code by N.R Naylor. For descriptions of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
+    code("App Last updated February 2020. Latest Data Source July 2020. This code may take a few seconds to run on first loading so please be patient"),
+    br(),
+    strong("Based on Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020), Excel Model Version 5.0."),
+    strong("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")),           
     
-    h6("App by N.R Naylor. For description of how to use and resources see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
-    
-    h6("Based on A. Briggs 2020 Covid19 QALY Excel Tool Version 5.0: https://www.lshtm.ac.uk/research/centres-projects-groups/chil#covid-19"),
-    h6("Last updated November 2020"),
-    h6("This code may take a few seconds to run so please be patient"),
-               
+    tabPanel("Results by Age Group",
+    h3("Breakdown by Age Group"),
+    tableOutput("agetab"),
+    br(),
+    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years. In this instance, these are the expected values conditional on a person being in the relevant age group"),
+    h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM)- Percentage of population quality of life norms in the comorbidity group"),
     )
-  )
+    
+    )))
 
 
 ######################################################
@@ -87,9 +96,17 @@ server <- function(input,output){
   model <- eventReactive(xxchange(), {
    country <- input$country
    smr <- input$smr
-   qcm <- input$qcm
-   r <- input$r
-    
+   qcm <- input$qcm/100
+   r <- input$r/100
+  
+   validate(
+     need(input$smr <=5, "SMR input is invalid, please try another value"),
+     need(input$smr >=1, "SMR input is invalid, please try another value"),
+     need(input$r <=10, "Please choose a valid discount rate between 0% and 10%"),
+     need(input$r >=0, "Please choose a valid discount rate between 0% and 10%"),
+     need(input$qcm <=100, "Please choose a valid qCM between 0% and 100%"),
+     need(input$qcm >=0, "Please choose a valid qCM between 0% and 100%")
+   )
     myvector <- c("Age",country)
     
     l_x_est <- function(dt, countr, smr){
@@ -159,10 +176,14 @@ server <- function(input,output){
     }
     
     temp.q <- bind_rows(temp.q, .id = "column_label")
-    temp.q[ , column_label := as.numeric(column_label)-1]
-    temp.q[ , b_x := z_x/((1+r))^(x.x-(column_label))]
+    temp.q %>% setDT() ## creating a copy as otherwise there is a warning
+    ## message (still runs but just for "clean" code), so this stops attempts of .internal.selfref detected
+    temp.q_copy <- copy(temp.q)
+    temp.q_copy[ , column_label := as.numeric(column_label)-1]
+    temp.q_copy[ , b_x := z_x/((1+r))^(x.x-(column_label))] ## n.b x.x = u and column_label = x in the corresponding formulae in the CodeBook
     
-    total.b <- temp.q[,.(bigb_x=sum(b_x)), by=column_label]
+    
+    total.b <- temp.q_copy[,.(bigb_x=sum(b_x)), by=column_label]
     colnames(total.b) <- c("x.x","bigb_x")
     qale <- merge(qale, total.b, by="x.x")
     
@@ -185,13 +206,22 @@ server <- function(input,output){
     resultstab <- data.table("Weighted LE Loss"=estimates["weight.LE"],
                           "Weighted QALE Loss"=estimates["weight.qale"],
                           "Weighted dQALY loss"=estimates["weight.qaly"])
+   ### ADDING AGE GROUP BREAKDOWN TABLE
+    cov[,"Age Group":=paste(cov[,low],cov[,high],sep="-")]
+    cov[ , "Age at Death (% of all deaths)" := cov_age*100]
+    setnames(cov, old=c("LE_x","qale_x","dQALY"),
+             new=c("LE","QALE","dQALY"))
+
+    agetab <- cov[ , c("Age Group","Age at Death (% of all deaths)",
+                       "LE","QALE","dQALY")]
     
-   
+    list(resultstab=resultstab, agetab=agetab)
   })
 
 
   
-  output$resultstab <- renderTable(model())
+  output$resultstab <- renderTable(model()$resultstab, bordered = TRUE)
+  output$agetab <- renderTable(model()$agetab, bordered = TRUE)
 
 }
 
