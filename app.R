@@ -29,7 +29,7 @@ ui <- fluidPage(
     tags$style(HTML("hr {border-top: 1px solid #000000;}"))
   ),
   
-  titlePanel("The COVID-19 Excess-Death QALY Loss Calculator"),
+  titlePanel("The COVID-19 QALY Loss Calculator for Associated Deaths"),
   
   sidebarPanel(h3("Key Inputs"),
               
@@ -43,18 +43,19 @@ ui <- fluidPage(
                             max = 5),
               
                ##assumed reduction in QoL due to comorbidities
-               numericInput("qcm", em("Comorbidity Quality of Life Adjustment Factor (%)"), 100, min = 0, 
+               numericInput("qcm", em("Comorbidity Quality of Life Adjustment Factor (0%-100%)"), 100, min = 0, 
                             max = 100),
                
                ## discount rate
-               numericInput("r", em("Discount rate (%)"), 3.5, min = 0, 
+               numericInput("r", em("Discount rate (0%-10%)"), 3.5, min = 0, 
                             max = 100)
                
   ),
   
   mainPanel(
-    
-    h3("Results"),
+    tabsetPanel(type = "tabs", 
+                tabPanel("Main Results",
+    h3("Weighted Mean Loss per Death"),
       br(),
     
     tableOutput("resultstab"),
@@ -65,12 +66,20 @@ ui <- fluidPage(
     h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM)- Percentage of population quality of life norms in the comorbidity group"), 
     h5("Note that this calculator calculates QALY losses from excess deaths only, weighted across the frequency distribution of age at death for COVID‐19"),
     code("App & R code by N.R Naylor. For descriptions of  model code and underlying data see: https://github.com/LSHTM-CHIL/COVID19_QALY_App"),
-    code("Last updated Febuary 2020, This code may take a few seconds to run on first loading so please be patient"),
+    code("App Last updated February 2020. Latest Data Source July 2020. This code may take a few seconds to run on first loading so please be patient"),
     br(),
     strong("Based on Briggs, Andrew H., et al. Estimating (quality‐adjusted) life‐year losses associated with deaths: With application to COVID‐19 Health Economics (2020), Excel Model Version 5.0."),
-    strong("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")           
+    strong("This work was done as part of the Centre for Health Economics in London at the London School of Hygiene and Tropical Medicine")),           
+    
+    tabPanel("Results by Age Group",
+    h3("Breakdown by Age Group"),
+    tableOutput("agetab"),
+    br(),
+    h5("Abbreviations: LE - Life Expectancy, QALE - Quality Adjusted Life Expectancy, dQALY - Discounted Quality Adjusted Life Years. In this instance, these are the expected values conditional on a person being in the relevant age group"),
+    h5("Definitions: Standardized mortality ratio (SMR) - the increase in mortality in the comorbidity group compared to population norms, Comorbidity Quality of Life Adjustment Factor (qCM)- Percentage of population quality of life norms in the comorbidity group"),
     )
-  )
+    
+    )))
 
 
 ######################################################
@@ -93,8 +102,8 @@ server <- function(input,output){
    validate(
      need(input$smr <=5, "SMR input is invalid, please try another value"),
      need(input$smr >=1, "SMR input is invalid, please try another value"),
-     need(input$r <=100, "Please choose a valid discount rate between 0% and 100%"),
-     need(input$r >=0, "Please choose a valid discount rate between 0% and 100%"),
+     need(input$r <=10, "Please choose a valid discount rate between 0% and 10%"),
+     need(input$r >=0, "Please choose a valid discount rate between 0% and 10%"),
      need(input$qcm <=100, "Please choose a valid qCM between 0% and 100%"),
      need(input$qcm >=0, "Please choose a valid qCM between 0% and 100%")
    )
@@ -197,12 +206,22 @@ server <- function(input,output){
     resultstab <- data.table("Weighted LE Loss"=estimates["weight.LE"],
                           "Weighted QALE Loss"=estimates["weight.qale"],
                           "Weighted dQALY loss"=estimates["weight.qaly"])
-   
+   ### ADDING AGE GROUP BREAKDOWN TABLE
+    cov[,"Age Group":=paste(cov[,low],cov[,high],sep="-")]
+    cov[ , "Age at Death (% of all deaths)" := cov_age*100]
+    setnames(cov, old=c("LE_x","qale_x","dQALY"),
+             new=c("LE","QALE","dQALY"))
+
+    agetab <- cov[ , c("Age Group","Age at Death (% of all deaths)",
+                       "LE","QALE","dQALY")]
+    
+    list(resultstab=resultstab, agetab=agetab)
   })
 
 
   
-  output$resultstab <- renderTable(model(), bordered = TRUE)
+  output$resultstab <- renderTable(model()$resultstab, bordered = TRUE)
+  output$agetab <- renderTable(model()$agetab, bordered = TRUE)
 
 }
 

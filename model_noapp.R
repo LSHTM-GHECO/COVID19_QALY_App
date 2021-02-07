@@ -13,7 +13,9 @@ q.female <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 2))
 qol <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 3))
 covid.age <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 4))
 
-
+### set case study to test model run
+## note qcm and r are already in 0-1 format and on the app 
+# start off as %s
     country <- "UK"
     smr <- 2
     qcm <- 0.4
@@ -118,8 +120,12 @@ covid.age <- as.data.table(read.xlsx("Inputs/inputs.xlsx", 4))
                              "Weighted QALE Loss"=estimates["weight.qale"],
                              "Weighted dQALY loss"=estimates["weight.qaly"])
     
-    
-
+    ### age breakdown table
+    cov[,"Age Group":=paste(cov[,low],cov[,high],sep="-")]
+    cov[ , "Age at Death (% of all deaths)" := cov_age*100]
+    setnames(cov, old=c("LE_x","qale_x","dQALY"), 
+             new=c("LE","QALE","dQALY"))
   
-  
+   agetab <- cov[ , c("Age Group","Age at Death (% of all deaths)",
+                     "LE","QALE","dQALY")]
   
